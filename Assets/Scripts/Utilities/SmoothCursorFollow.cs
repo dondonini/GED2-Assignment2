@@ -9,7 +9,8 @@ public class SmoothCursorFollow : MonoBehaviour {
 
     [Range(0.0f, 1.0f)]
     public float m_turnPercentage = 0.5f;
-    public Vector2 cursorOffset = new Vector2(0.0f, 10.0f);
+    public Vector2 cursorOffset = new Vector2(0.0f, 0.0f);
+    public Transform m_centre;
 
     private Camera m_mainCamera;
 
@@ -35,12 +36,12 @@ public class SmoothCursorFollow : MonoBehaviour {
         // Get max distance
         Vector3 lookAtFinalPos = GetMouseVectorFromCenter() * GetClampedMouseDistanceFromCenter(0.0f, m_maxTurnFromCenter);
 
-        Debug.DrawLine(Vector3.zero, lookAtFinalPos, Color.red);
+        Debug.DrawLine(m_centre.position, lookAtFinalPos, Color.red);
 
         // Apply percentage
-        lookAtFinalPos = Vector3.Lerp(Vector3.zero, lookAtFinalPos, m_turnPercentage);
+        lookAtFinalPos = Vector3.Lerp(m_centre.position, lookAtFinalPos, m_turnPercentage);
 
-        Debug.DrawLine(Vector3.zero, lookAtFinalPos, Color.green);
+        Debug.DrawLine(m_centre.position, lookAtFinalPos, Color.green);
 
         // SmoothDamp LookAt motion
         m_lookAtTransform.position = Vector3.SmoothDamp(m_lookAtTransform.position, lookAtFinalPos, ref m_velocity, m_dampening);
@@ -56,7 +57,7 @@ public class SmoothCursorFollow : MonoBehaviour {
     /// <returns>Mouse position vector</returns>
     private Vector3 Get3DMousePos()
     {
-        Vector3 result = Vector3.zero;
+        Vector3 result = m_centre.position;
 
         if (Input.mousePresent)
         {
@@ -67,7 +68,6 @@ public class SmoothCursorFollow : MonoBehaviour {
             if (Physics.Raycast(ray, out hit, 1 << LayerMask.NameToLayer("CursorPos")))
             {
                 result = hit.point;
-                result.z = 0.0f;
             }
         }
 
@@ -84,13 +84,13 @@ public class SmoothCursorFollow : MonoBehaviour {
     {
         Vector3 mousePos = Get3DMousePos();
 
-        float distance = Vector3.Distance(Vector3.zero, mousePos);
+        float distance = Vector3.Distance(m_centre.position, mousePos);
 
         return Mathf.Clamp(distance, min, max);
     }
 
     private Vector3 GetMouseVectorFromCenter()
     {
-        return (Get3DMousePos() - Vector3.zero).normalized;
+        return (Get3DMousePos() - m_centre.position).normalized;
     }
 }
